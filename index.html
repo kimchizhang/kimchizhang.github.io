@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EXIF Image Editor</title>
   <style>
-    #controls {
-      margin: 10px 0;
-    }
     body {
       height: 100vh;
       display: flex;
@@ -16,41 +13,81 @@
       justify-content: center;
       margin: 0;
       background-color: #f4f4f4;
-    }
-    canvas {
-      border: 1px solid #ccc;
-      margin-top: 10px;
+      font-family: 'sfpro';
+      padding: 0 1rem;
+
     }
     header, footer {
+      position: fixed;
       width: 100%;
       max-height: 20vh;
-      padding: 2vh 0;
-      text-align: center;
+      padding: 0.9vh 0;
       background: #1abc9c;
       color: white;
-      font-size: 30px;
+      font-size: 40px;
       overflow: hidden;
     }
-    footer {
-      position: fixed;
-      bottom: 0;
+    header {top: 0;}
+    footer {bottom: 0;}
+    #display_image {
+      background-position: center;
+      border: 1px solid black;
+      background-size: contain;
+      background-repeat: no-repeat;
+      text-align: center;
+      display: inline-block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .file-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background: white;
+      color: #1abc9c;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+    }
+    .file-label:hover {
+      background: #16a085;
+      color: white;
+    }
+    .container {
+      display: flex;
+      border: 3px solid green;
+      text-align: center!important;
+      width: 100vh!important;
+      height: 70vh;
+      align-items: center;
+      justify-content: center;
+    }
+    @media screen and (max-width:600px) {
+      #display_image {
+        width: 100%;
+      }
+    }
+    @font-face {
+      font-family: "sfpro";
+      src: url("fonts/sf-pro-text_regular.woff2");
     }
   </style>
 </head>
 <body>
   <header class="header">
-    unko
+    <label for="image_input" class="file-label">Upload Image</label>
+    <input type="file" id="image_input" accept="image/png, image/jpg" style="display: none;">
+    aaaa
   </header>
-  <h1>Upload an Image</h1>
-  <input type="file" id="imageInput" accept="image/*" />
-  <div id="controls">
-    <button id="toggleText">Toggle Text</button>
+  <div class="container">
+    <canvas id="display_image" role="button" aria-label="AA"></canvas>
   </div>
-  <canvas id="canvas"></canvas>
   <footer>
-    footer
+    <button id="download">Download</button>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
-  <script src="script.js"></script>
+  <script src="js/script.js"></script>
 </body>
 </html>
