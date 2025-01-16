@@ -1,74 +1,86 @@
-const imageInput = document.getElementById("imageInput");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const toggleTextButton = document.getElementById("toggleText");
+const imageInput = document.getElementById("image_input");
+const displayImageCanvas = document.getElementById("display_image");
+const ctx = displayImageCanvas.getContext("2d");
+const downloadButton = document.getElementById("download");
+const container = document.querySelector(".container");
 
-let img = null;
-let exifText = "";
-let textVisible = true; // Tracks if text is visible
+const MAX_CANVAS_WIDTH = 1000;
+const MAX_CANVAS_HEIGHT = 1000;
 
-imageInput.addEventListener("change", () => {
-  const file = imageInput.files[0];
+displayImageCanvas.width = container.offsetWidth;
+displayImageCanvas.height = container.offsetHeight;
+
+let uploadedFile = null; // Store the uploaded file globally
+let img = new Image();
+
+imageInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        fitCanvasToImage();
-        drawImageWithText();
-      };
+    uploadedFile = file; // Save file globally for download
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
 
-      // Extract EXIF data
-      EXIF.getData(file, function () {
-        const exifData = EXIF.getAllTags(this);
-        exifText = exifData.Make
-          ? `Camera: ${exifData.Make} ${exifData.Model}`
-          : "No EXIF data found";
-      });
+      // Resize canvas while maintaining aspect ratio
+      let newWidth = img.width;
+      let newHeight = img.height;
+
+      if (img.width > MAX_CANVAS_WIDTH || img.height > MAX_CANVAS_HEIGHT) {
+        if (aspectRatio > 1) {
+          newWidth = MAX_CANVAS_WIDTH;
+          newHeight = newWidth / aspectRatio;
+        } else {
+          newHeight = MAX_CANVAS_HEIGHT;
+          newWidth = newHeight * aspectRatio;
+        }
+      }
+
+      displayImageCanvas.width = newWidth;
+      displayImageCanvas.height = newHeight;
+
+      // Draw image and text on canvas
+      ctx.clearRect(0, 0, displayImageCanvas.width, displayImageCanvas.height);
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+      ctx.font = "50px sfpro";
+      ctx.fillStyle = "white";
+      ctx.fillText("Hello World", 50, newHeight - 50);
     };
-    reader.readAsDataURL(file);
+
+    img.src = URL.createObjectURL(file);
   }
 });
 
-// Function to fit the canvas and image within the screen
-function fitCanvasToImage() {
-  const maxWidth = window.innerWidth * 0.9; // Use 90% of screen width
-  const maxHeight = window.innerHeight * 0.8; // Use 80% of screen height
-
-  // Calculate aspect ratio
-  const imgAspectRatio = img.width / img.height;
-  const screenAspectRatio = maxWidth / maxHeight;
-
-  if (imgAspectRatio > screenAspectRatio) {
-    // Image is wider than screen
-    canvas.width = maxWidth;
-    canvas.height = maxWidth / imgAspectRatio;
-  } else {
-    // Image is taller than screen
-    canvas.height = maxHeight;
-    canvas.width = maxHeight * imgAspectRatio;
+downloadButton.addEventListener("click", () => {
+  if (!uploadedFile) {
+    alert("No image uploaded!");
+    return;
   }
-}
 
-// Function to draw the image with or without text
-function drawImageWithText() {
-  if (!img) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const downloadCanvas = document.createElement("canvas");
+  const downloadCtx = downloadCanvas.getContext("2d");
 
-  if (textVisible && exifText) {
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.strokeText(exifText, 10, 30);
-    ctx.fillText(exifText, 10, 30);
-  }
-}
+  img.onload = () => {
+    downloadCanvas.width = img.width;
+    downloadCanvas.height = img.height;
 
-// Toggle text visibility
-toggleTextButton.addEventListener("click", () => {
-  textVisible = !textVisible;
-  drawImageWithText();
+    // Draw the image and text on the new canvas
+    downloadCtx.drawImage(img, 0, 0, img.width, img.height);
+    downloadCtx.font = "50px sfpro";
+    downloadCtx.fillStyle = "white";
+    downloadCtx.fillText("Hello", 50, img.height - 50);
+
+    // Trigger download
+    const link = document.createElement("a");
+    link.href = downloadCanvas.toDataURL("image/png");
+    link.download = "image_with_text.png";
+    link.click();
+  };
+
+  img.src = URL.createObjectURL(uploadedFile); // Use the globally saved file
 });
+
+// Add button functionality
+displayImageCanvas.addEventListener("click", () => {
+  console.log("ﾔｼﾞｭｾﾝﾊﾟｲｲｷｽｷﾞﾝｲｸｲｸｱｯｱｯｱｯｱｰﾔﾘﾏｽﾈ");
+});
+
+// if image height < width, then the text is 1/2 the size of when the image is height < width.
