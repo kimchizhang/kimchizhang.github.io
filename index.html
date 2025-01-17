@@ -13,19 +13,18 @@
       justify-content: center;
       margin: 0;
       background-color: #f4f4f4;
-      font-family: 'sfpro';
+      font-family: 'inter';
       padding: 0 1rem;
-
     }
     header, footer {
       position: fixed;
       width: 100%;
       max-height: 20vh;
-      padding: 0.9vh 0;
       background: #1abc9c;
       color: white;
-      font-size: 40px;
+      font-size: 0;
       overflow: hidden;
+      text-align: center;
     }
     header {top: 0;}
     footer {bottom: 0;}
@@ -41,17 +40,19 @@
       max-width: 100%;
       max-height: 100%;
     }
-    .file-label {
+    .file-label, .download-label, .edit-label {
       display: inline-block;
-      padding: 10px 20px;
-      background: white;
-      color: #1abc9c;
-      border-radius: 5px;
+      padding: 10px 0;
+      background: #1abc9c;
+      color: #ffffff;
+      border-radius: 0;
       cursor: pointer;
       font-weight: bold;
       transition: background 0.3s, color 0.3s;
+      width: 50vw;
+      font-size: 20px;
     }
-    .file-label:hover {
+    .file-label:hover, .download-label:hover, .edit-label:hover {
       background: #16a085;
       color: white;
     }
@@ -60,9 +61,25 @@
       border: 3px solid green;
       text-align: center!important;
       width: 100vw!important;
-      height: 70vh;
+      height: 80vh;
       align-items: center;
       justify-content: center;
+    }
+    .hidden-text {
+      font-family: "sfpro";
+      font-size: 0; /* Invisible, but forces the font to load */
+      opacity: 0;
+    }
+    .menu {
+      display: none; /* Hide the menu by default */
+      position: absolute;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      width: 150px;
+    }
+    #edit:checked + .menu {
+      display: block; /* Show the menu when the checkbox is checked */
     }
     @media screen and (max-width:600px) {
       #display_image {
@@ -73,20 +90,37 @@
       font-family: "sfpro";
       src: url("fonts/sf-pro-text_regular.woff2");
     }
+    @font-face {
+      font-family: "inter";
+      src: url("fonts/Inter_18pt-Light.ttf");
+    }
   </style>
 </head>
 <body>
   <header class="header">
     <label for="image_input" class="file-label">Upload Image</label>
     <input type="file" id="image_input" accept="image/png, image/jpg" style="display: none;">
-    aaaa
+    <label for="download" class="download-label">Download</label>
+    <input id="download" style="display: none;">
   </header>
+  <audio id="xyz" src="others/okapeople.mp3" preload="auto"></audio>
   <div class="container">
     <canvas id="display_image" role="button" aria-label="AA"></canvas>
   </div>
+  <span class="hidden-text"></span>
+  <div class="menu">
+    <ul>
+      <li><a href="#">Chin</a></li>
+      <li><a href="#">Option 2</a></li>
+      <li><a href="#">Option 3</a></li>
+    </ul>
+  </div>
   <footer>
-    <button id="download">Download</button>
+    <label for="edit" class="edit-label">Edit</label>
+    <input id="edit" type="checkbox" style="display: none;">
+    aaaa
   </footer>
+  <link rel="preload" href="fonts/sf-pro-text_regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
   <script src="js/script.js"></script>
 </body>
