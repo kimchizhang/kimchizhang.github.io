@@ -55,7 +55,7 @@ uploadButton.addEventListener("change", (event) => {
       ctx.fillStyle = "white";
 
       const base_image = new Image();
-      base_image.src = 'apple_logo.png';
+      base_image.src = 'others/apple_logo.png';
 
       if (img.width > img.height) {
         drawText(`${exifData.cameraModel}`, newWidth * 0.02, newHeight * 0.93, newHeight * 0.035, 'sfpro');
