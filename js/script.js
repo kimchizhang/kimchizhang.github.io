@@ -3,8 +3,6 @@ const displayImageCanvas = document.getElementById("display_image");
 const ctx = displayImageCanvas.getContext("2d");
 const downloadButton = document.getElementById("download");
 const container = document.querySelector(".container");
-const nameFontSize = (displayImageCanvas.height / displayImageCanvas.width) * 210;
-const detailsFontSize = nameFontSize - 35;
 
 const MAX_CANVAS_WIDTH = 7000;
 const MAX_CANVAS_HEIGHT = 7000;
@@ -14,6 +12,7 @@ displayImageCanvas.height = container.offsetHeight;
 
 let uploadedFile = null; // Store the uploaded file globally
 let img = new Image();
+
 let exifData = {};
 
 uploadButton.addEventListener("change", (event) => {
@@ -53,20 +52,29 @@ uploadButton.addEventListener("change", (event) => {
       // Draw image and text on canvas
       ctx.clearRect(0, 0, displayImageCanvas.width, displayImageCanvas.height);
       ctx.drawImage(img, 0, 0, newWidth, newHeight);
-      ctx.font = `${nameFontSize}px sfpro`;
       ctx.fillStyle = "white";
 
+      const base_image = new Image();
+      base_image.src = 'apple_logo.png';
+
       if (img.width > img.height) {
-        drawText(`${exifData.cameraModel}`, newWidth * 0.02, newHeight * 0.93, `${nameFontSize}`, 'sfpro');
+        drawText(`${exifData.cameraModel}`, newWidth * 0.02, newHeight * 0.93, newHeight * 0.035, 'sfpro');
         drawText(`${exifData.focalLength}`+"mm"+"・"+"f/"+`${exifData.aperture}`+"・1/"
           +`${1 / exifData.exposureTime}`+"s"+"・"+"ISO"+`${exifData.iso}`, newWidth * 0.02, 
-          newHeight * 0.93 + newHeight * 0.037, `${detailsFontSize}`, 'sfpro');
+          newHeight * 0.93 + newHeight * 0.037, newHeight * 0.023, 'sfpro');
+        base_image.onload = function() {
+          ctx.drawImage(base_image, newWidth * 0.935, newHeight * 0.91, newWidth * 0.05, newWidth * 0.05);
+        };
       }
+      // FIX THIS PART ASAP LIKE THE IF!!!!
       else {
-        drawText(`${exifData.cameraModel}`, newWidth * 0.03, newHeight * 0.945, `${nameFontSize}`, 'sfpro');
+        drawText(`${exifData.cameraModel}`, newWidth * 0.03, newHeight * 0.945, newWidth * 0.035, 'sfpro');
         drawText(`${exifData.focalLength}`+"mm"+"・"+"f/"+`${exifData.aperture}`+"・1/"
           +`${1 / exifData.exposureTime}`+"s"+"・"+"ISO"+`${exifData.iso}`, newWidth * 0.03, 
-          newHeight * 0.945 + newHeight * 0.03, `${detailsFontSize}`, 'sfpro');
+          newHeight * 0.945 + newHeight * 0.03, newWidth * 0.024, 'sfpro'); 
+        base_image.onload = function() {
+          ctx.drawImage(base_image, newWidth * 0.91, newHeight * 0.932, newWidth * 0.07, newWidth * 0.07);
+        };   
       }
 
       function drawText(text,centerX,centerY,fontsize,fontface){
@@ -90,11 +98,11 @@ downloadButton.addEventListener("click", () => {
 
   // Extract the original file name without the extension
   const originalFileName = uploadedFile.name.split(".").slice(0, -1).join(".");
-  const downloadFileName = `${originalFileName}_kimchi.png`;
+  const downloadFileName = `${originalFileName}_kimchi.jpg`;
 
   // Trigger download of the current canvas content
   const link = document.createElement("a");
-  link.href = displayImageCanvas.toDataURL("image/png");
+  link.href = displayImageCanvas.toDataURL("image/jpeg");
   link.download = downloadFileName;
   link.click();
 });
@@ -102,6 +110,8 @@ downloadButton.addEventListener("click", () => {
 // Add button functionality
 container.addEventListener("click", () => {
   console.log("ﾔｼﾞｭｾﾝﾊﾟｲｲｷｽｷﾞﾝｲｸｲｸｱｯｱｯｱｯｱｰﾔﾘﾏｽﾈ");
+  console.log(displayImageCanvas.height);
+  console.log(displayImageCanvas.width);
 });
 
 const menu = document.querySelector('.menu');
