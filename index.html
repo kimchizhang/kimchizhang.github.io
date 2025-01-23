@@ -15,6 +15,7 @@
       background-color: #f4f4f4;
       font-family: 'inter';
       padding: 0 1rem;
+      color: white;
     }
     header, footer {
       position: fixed;
@@ -26,8 +27,6 @@
       overflow: hidden;
       text-align: center;
     }
-    header {top: 0;}
-    footer {bottom: 0;}
     #display_image {
       background-position: center;
       background-size: contain;
@@ -41,18 +40,23 @@
     }
     .file-label, .download-label, .edit-label {
       display: inline-block;
-      padding: 10px 0;
-      background: #1abc9c;
+      padding: 0.8rem 0;
+      /* background: #1abc9c; */
+      background: black;
       color: #ffffff;
       border-radius: 0;
       cursor: pointer;
       font-weight: bold;
       transition: background 0.3s, color 0.3s;
       width: 50vw;
-      font-size: 20px;
+      font-size: 1rem;
+    }
+    .edit-label {
+      width: 100vw;
     }
     .file-label:hover, .download-label:hover, .edit-label:hover {
-      background: #16a085;
+      /* background: #16a085; */
+      background: #a8a8a3;
       color: white;
     }
     .container {
@@ -65,16 +69,62 @@
     }
     .hidden-text {
       font-family: "sfpro";
-      font-size: 0; /* Invisible, but forces the font to load */
+      font-size: 0; /* Invisible but forces the font to load */
       opacity: 0;
     }
     .menu {
+      background-color: black;
       display: none; /* Hide the menu by default */
       position: absolute;
-      background-color: white;
-      border: 1px solid #ccc;
-      padding: 10px;
-      width: 150px;
+      width: 100vw;
+      height: 30vh;
+      justify-content: center;
+      align-items: center;
+      bottom: 0;
+    }
+    .box {
+      display: flex;
+      flex-direction: column; /* Stack buttons vertically */
+      align-items: center;
+      gap: 10px; /* Add spacing between buttons */
+      padding: 0 10px;
+    }
+    .box label {
+      width: 120px;
+      height: 40px;
+      background: #1b1b1b;
+      color: white;
+      font-size: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    #option-1:checked ~ .option-1,
+    #option-2:checked ~ .option-2,
+    #option-3:checked ~ .option-3,
+    #option-4:checked ~ .option-4 {
+      background: #e2b714;
+      color: white;
+    }
+    .menu .box label:hover {
+      background: #a8a8a3;
+      color: black;
+    }
+    /* Hide original radio buttons */
+    .menu .box input[type="radio"] {
+      display: none;
+    }
+    .instructionTxt {
+      position: absolute;
+      display: table-cell; 
+      vertical-align: middle;
+      color: black;
+      text-align: center;
+    }
+    .instructionRow2 {
+      color: #f4f4f4;
     }
     #edit:checked + .menu {
       display: block; /* Show the menu when the checkbox is checked */
@@ -95,25 +145,50 @@
   </style>
 </head>
 <body>
-  <header class="header">
-    <label for="image_input" class="file-label">Upload Image</label>
-    <input type="file" id="image_input" accept="image/png, image/jpg" style="display: none;">
-    <label for="download" class="download-label">Download</label>
-    <input id="download" style="display: none;">
-  </header>
   <audio id="xyz" src="others/okapeople.mp3" preload="auto"></audio>
   <div class="container">
     <canvas id="display_image" role="button" aria-label="AA"></canvas>
   </div>
+  <div class="instructionTxt">
+    <div>
+      Select upload above to upload an image. Made by @KimchiZhang on X.
+    </div>
+    <div class="instructionRow2">YJSNPI</div>
+  </div>
   <span class="hidden-text"></span>
   <div class="menu">
-    <ul>
-      <li><a href="#">Chin</a></li>
-      <li><a href="#">Option 2</a></li>
-      <li><a href="#">Option 3</a></li>
-    </ul>
+    <div class="box">
+      Display Logo:
+      <input type="radio" name="displayLogo" id="option-1" checked>
+      <input type="radio" name="displayLogo" id="option-2">
+
+      <label for="option-1" class="option-1">
+        <div class="text">Show</div>
+      </label>
+      <label for="option-2" class="option-2">
+        <div class="text">Hide</div>
+      </label>
+    </div>
+    <div class="box">
+      Display Time:
+      <input type="radio" name="displayTime" id="option-3">
+      <input type="radio" name="displayTime" id="option-4" checked>
+
+      <label for="option-3" class="option-3" checked>
+        <div class="text">Show</div>
+      </label>
+      <label for="option-4" class="option-4">
+        <div class="text">Hide</div>
+      </label>
+    </div>
   </div>
-  <footer>
+  <header class="header" style="top: 0;">
+    <label for="image_input" class="file-label">Upload</label>
+    <input type="file" id="image_input" accept="image/png, image/jpg" style="display: none;">
+    <label for="download" class="download-label">Download</label>
+    <input id="download" style="display: none;">
+  </header>
+  <footer id="footer" style="bottom: 0;">
     <label for="edit" class="edit-label">Edit</label>
     <input id="edit" type="checkbox" style="display: none;">
     aaaa
