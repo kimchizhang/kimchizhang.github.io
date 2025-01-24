@@ -15,6 +15,7 @@ displayImageCanvas.height = container.offsetHeight;
 let uploadedFile = null; // Store the uploaded file globally
 let img = new Image();
 let showBaseImage = checkboxLogo.checked; // Logo shows initially
+let showTime = false; 
 
 let exifData = {};
 
@@ -27,8 +28,6 @@ function redraw(img, exifData, base_image, ctx, newWidth, newHeight) {
 
   if (img.width > img.height) {
     drawText(`${exifData.cameraModel}`, newWidth * 0.02, newHeight * 0.93, newHeight * 0.035, 'sfpro');
-    drawText(`${exifFour}`, newWidth * 0.02, 
-      newHeight * 0.93 + newHeight * 0.037, newHeight * 0.023, 'sfpro');
 
     if (showBaseImage && base_image && base_image.complete) {
       console.log("Drawing base image.");
@@ -36,10 +35,17 @@ function redraw(img, exifData, base_image, ctx, newWidth, newHeight) {
     } else {
       console.log("Base image not drawn. Either hidden or not loaded.");
     }
+
+    if (showTime) {
+      const timeText = `${exifData.dateTaken.split(" ")[1]}`; // Extract the time part
+      drawText(`${exifFour}`+"｜"+`${exifData.dateTaken}`, newWidth * 0.02, 
+      newHeight * 0.93 + newHeight * 0.037, newHeight * 0.023, 'sfpro'); 
+    } else {
+      drawText(`${exifFour}`, newWidth * 0.02, 
+      newHeight * 0.93 + newHeight * 0.037, newHeight * 0.023, 'sfpro'); 
+    }
   } else {
     drawText(`${exifData.cameraModel}`, newWidth * 0.03, newHeight * 0.945, newWidth * 0.035, 'sfpro');
-    drawText(`${exifFour}`, newWidth * 0.03, 
-      newHeight * 0.945 + newHeight * 0.03, newWidth * 0.024, 'sfpro'); 
 
     if (showBaseImage && base_image && base_image.complete) {
       console.log("Drawing base image.");
@@ -47,8 +53,35 @@ function redraw(img, exifData, base_image, ctx, newWidth, newHeight) {
     } else {
       console.log("Base image not drawn. Either hidden or not loaded.");
     }
+
+    if (showTime) {
+      const timeText = `${exifData.dateTaken.split(" ")[1]}`; // Extract the time part
+      drawText(`${exifFour}`+"｜"+`${exifData.dateTaken}`, newWidth * 0.03, 
+      newHeight * 0.945 + newHeight * 0.03, newWidth * 0.024, 'sfpro'); 
+    } else {
+      drawText(`${exifFour}`, newWidth * 0.03, 
+      newHeight * 0.945 + newHeight * 0.03, newWidth * 0.024, 'sfpro'); 
+    }
   }
 }
+
+function convertDateTime(dateTime) {
+  // Split the string into date and time parts
+  const parts = dateTime.split(" ");
+  
+  // Check if the string is in the expected format with both date and time
+  if (parts.length === 2) {
+    // Replace colons with dashes in the date part only
+    parts[0] = parts[0].replace(/:/g, "-");
+    
+    // Rejoin the date and time parts, keeping the time part intact
+    return parts.join(" ");
+  } else {
+    // If the dateTime doesn't match the expected format, return it as is
+    return dateTime;
+  }
+}
+
 
 function drawText(text,centerX,centerY,fontsize,fontface) {
   ctx.save();
@@ -70,6 +103,11 @@ uploadButton.addEventListener("change", (event) => {
       exifData.exposureTime = EXIF.getTag(this, "ExposureTime");
       exifData.focalLength = EXIF.getTag(this, "FocalLengthIn35mmFilm");
       console.log("ﾔｼﾞｭｾﾝﾊﾟｲｲｷｽｷﾞﾝｲｸｲｸｱｯｱｯｱｯｱｰﾔﾘﾏｽﾈ");
+
+      if (exifData.dateTaken) {
+        exifData.dateTaken = convertDateTime(exifData.dateTaken);  // Fix format
+        console.log("Fixed DateTime (dateTaken):", exifData.dateTaken);
+      }
     });
     img.onload = () => {
       const aspectRatio = img.width / img.height;
@@ -173,6 +211,32 @@ document.querySelectorAll('input[name="displayLogo"]').forEach((radioButton) => 
           console.log("Option 2 selected: Hiding base image");
           redraw(img, exifData, null, ctx, newWidth, newHeight); // Example: No base image
         }
+      }
+    }
+  });
+});
+
+// Listen for changes on the radio buttons
+document.querySelectorAll('input[name="displayTime"]').forEach((radioButton) => {
+  radioButton.addEventListener('change', () => {
+    if (radioButton.checked) {
+      // Check which radio button is selected
+      if (radioButton.id === 'option-3') {
+        showTime = true;  // Show time
+        console.log("Time Displayed: ON");
+      } else {
+        showTime = false; // Hide time
+        console.log("Time Displayed: OFF");
+      }
+
+      // Redraw the canvas with the updated showTime flag
+      if (uploadedFile) {
+        const aspectRatio = img.width / img.height;
+        let newWidth = img.width;
+        let newHeight = img.height;
+
+        // Pass the showTime flag to redraw function
+        redraw(img, exifData, base_image, ctx, newWidth, newHeight);
       }
     }
   });
