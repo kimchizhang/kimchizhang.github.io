@@ -4,7 +4,11 @@ const ctx = displayImageCanvas.getContext("2d");
 const downloadButton = document.getElementById("download");
 const container = document.querySelector(".container");
 const checkboxLogo = document.getElementById('option-1');
-const base_image = new Image();
+const menu = document.querySelector('.menu');
+const downloadMenu = document.querySelector('.download-menu');
+const checkbox = document.getElementById('edit');
+const tapImage = document.querySelector('.tapImage');
+let base_image = new Image();
 
 const MAX_CANVAS_WIDTH = 7000;
 const MAX_CANVAS_HEIGHT = 7000;
@@ -19,51 +23,31 @@ let showTime = false;
 
 let exifData = {};
 
-function redraw(img, exifData, base_image, ctx, newWidth, newHeight) {
-  ctx.clearRect(0, 0, newWidth, newHeight); // Clear canvas
-  ctx.drawImage(img, 0, 0, newWidth, newHeight); // Draw main image
-
-  const exifFour = `${exifData.focalLength}`+"mm"+"・"+"f/"+`${exifData.aperture}`+"・1/"
-    +`${1 / exifData.exposureTime}`+"s"+"・"+"ISO"+`${exifData.iso}`;
-
-  if (img.width > img.height) {
-    drawText(`${exifData.cameraModel}`, newWidth * 0.02, newHeight * 0.93, newHeight * 0.035, 'sfpro');
-
-    if (showBaseImage && base_image && base_image.complete) {
-      console.log("Drawing base image.");
-      ctx.drawImage(base_image, newWidth * 0.935, newHeight * 0.91, newWidth * 0.05, newWidth * 0.05);
-    } else {
-      console.log("Base image not drawn. Either hidden or not loaded.");
-    }
-
-    if (showTime) {
-      const timeText = `${exifData.dateTaken.split(" ")[1]}`; // Extract the time part
-      drawText(`${exifFour}`+"｜"+`${exifData.dateTaken}`, newWidth * 0.02, 
-      newHeight * 0.93 + newHeight * 0.037, newHeight * 0.023, 'sfpro'); 
-    } else {
-      drawText(`${exifFour}`, newWidth * 0.02, 
-      newHeight * 0.93 + newHeight * 0.037, newHeight * 0.023, 'sfpro'); 
-    }
-  } else {
-    drawText(`${exifData.cameraModel}`, newWidth * 0.03, newHeight * 0.945, newWidth * 0.035, 'sfpro');
-
-    if (showBaseImage && base_image && base_image.complete) {
-      console.log("Drawing base image.");
-      ctx.drawImage(base_image, newWidth * 0.91, newHeight * 0.932, newWidth * 0.07, newWidth * 0.07);
-    } else {
-      console.log("Base image not drawn. Either hidden or not loaded.");
-    }
-
-    if (showTime) {
-      const timeText = `${exifData.dateTaken.split(" ")[1]}`; // Extract the time part
-      drawText(`${exifFour}`+"｜"+`${exifData.dateTaken}`, newWidth * 0.03, 
-      newHeight * 0.945 + newHeight * 0.03, newWidth * 0.024, 'sfpro'); 
-    } else {
-      drawText(`${exifFour}`, newWidth * 0.03, 
-      newHeight * 0.945 + newHeight * 0.03, newWidth * 0.024, 'sfpro'); 
-    }
+const buttonState = {
+  displayExif: { 
+    active: true, 
+    label: exifData => `${exifData.focalLength}`+"mm"+"・"+"f/"+`${exifData.aperture}`+"・1/"
+    +`${1 / exifData.exposureTime}`+"s"+"・"+"ISO"+`${exifData.iso}` // Dynamic label
+  },
+  displayTime: { 
+    active: false, 
+    label: exifData => `${exifData.dateTaken}` 
+  },
+  displayName: {
+    active: false,
+    label: () => ""
   }
-}
+};
+
+document.getElementById("fname").addEventListener("input", (event) => {
+  const userInput = event.target.value || ""; 
+
+  // Make `label` a function
+  buttonState.displayName.label = () => userInput;
+});
+
+// Usage example
+const labelText = buttonState.displayName.label(); // Call the function to get the value
 
 function convertDateTime(dateTime) {
   // Split the string into date and time parts
@@ -72,7 +56,7 @@ function convertDateTime(dateTime) {
   // Check if the string is in the expected format with both date and time
   if (parts.length === 2) {
     // Replace colons with dashes in the date part only
-    parts[0] = parts[0].replace(/:/g, "-");
+    parts[0] = parts[0].replace(/:/g, "/");
     
     // Rejoin the date and time parts, keeping the time part intact
     return parts.join(" ");
@@ -82,13 +66,48 @@ function convertDateTime(dateTime) {
   }
 }
 
-
 function drawText(text,centerX,centerY,fontsize,fontface) {
   ctx.save();
   ctx.font=fontsize+'px '+fontface;
   ctx.textBaseline='middle';
   ctx.fillText(text,centerX,centerY);
   ctx.restore();
+}
+
+function redraw(img, exifData, base_image, ctx, newWidth, newHeight) {
+  ctx.clearRect(0, 0, newWidth, newHeight); // Clear canvas
+  ctx.drawImage(img, 0, 0, newWidth, newHeight); // Draw main image
+
+  const exifFour = `${exifData.focalLength}`+"mm"+"・"+"f/"+`${exifData.aperture}`+"・1/"
+    +`${1 / exifData.exposureTime}`+"s"+"・"+"ISO"+`${exifData.iso}`;
+
+  const activeAxes = Object.keys(buttonState) // Create a string of "On" axes
+    .filter(axis => buttonState[axis].active) // Keep active ones
+    .map(axis => buttonState[axis].label(exifData));
+
+  if (img.width > img.height) {
+    drawText(activeAxes.join('｜'), newWidth * 0.02, newHeight * 0.93 + newHeight * 0.037, newHeight * 0.023, 'sfpro'); 
+    if (activeAxes.length === 0) {
+      drawText(`${exifData.cameraModel}`, newWidth * 0.02, newHeight * 0.95, newHeight * 0.04, 'sfpromed');
+    } else {
+      drawText(`${exifData.cameraModel}`, newWidth * 0.02, newHeight * 0.93, newHeight * 0.035, 'sfpromed');
+    }
+    if (showBaseImage && base_image && base_image.complete) {
+      ctx.drawImage(base_image, newWidth * 0.935, newHeight * 0.913, newWidth * 0.05, newWidth * 0.05);
+    }
+  } else { 
+    drawText(activeAxes.join('｜'), newWidth * 0.03, newHeight * 0.945 + newHeight * 0.03, newWidth * 0.024, 'sfpro'); 
+    if (activeAxes.length === 0) {
+      drawText(`${exifData.cameraModel}`, newWidth * 0.03, newHeight * 0.96, newWidth * 0.04, 'sfpromed');
+    } else {
+      drawText(`${exifData.cameraModel}`, newWidth * 0.03, newHeight * 0.945, newWidth * 0.035, 'sfpromed');
+    }
+    if (showBaseImage && base_image && base_image.complete) {
+      ctx.drawImage(base_image, newWidth * 0.91, newHeight * 0.932, newWidth * 0.07, newWidth * 0.07);
+    }
+  }
+
+  ctx.fillStyle = 'white';
 }
 
 uploadButton.addEventListener("change", (event) => {
@@ -106,7 +125,6 @@ uploadButton.addEventListener("change", (event) => {
 
       if (exifData.dateTaken) {
         exifData.dateTaken = convertDateTime(exifData.dateTaken);  // Fix format
-        console.log("Fixed DateTime (dateTaken):", exifData.dateTaken);
       }
     });
     img.onload = () => {
@@ -145,22 +163,29 @@ uploadButton.addEventListener("change", (event) => {
   }
 });
 
-downloadButton.addEventListener("click", () => {
+downloadButton.addEventListener("click", function (e) {
   if (!uploadedFile) {
     document.getElementById('xyz').play();
     alert("upload an image first idiot");
     return;
   }
 
-  // Extract the original file name without the extension
   const originalFileName = uploadedFile.name.split(".").slice(0, -1).join(".");
   const downloadFileName = `${originalFileName}_kimchi.jpg`;
+  const imageURL = displayImageCanvas.toDataURL("image/jpeg");
 
-  // Trigger download of the current canvas content
-  const link = document.createElement("a");
-  link.href = displayImageCanvas.toDataURL("image/jpeg");
-  link.download = downloadFileName;
-  link.click();
+  e.stopPropagation(); // Prevents the event from bubbling up immediately
+  setTimeout(() => {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      downloadMenu.style.display = "flex";
+      tapImage.src = imageURL;
+    } else {
+      const link = document.createElement("a");
+      link.href = imageURL;
+      link.download = downloadFileName;
+      link.click();
+    }
+  }, 0); // Delays execution so the other click event finishes first
 });
 
 // Add button functionality
@@ -169,75 +194,70 @@ container.addEventListener("click", () => {
   console.log(displayImageCanvas.width);
 });
 
-const menu = document.querySelector('.menu');
-const checkbox = document.getElementById('edit');
-
 // Toggle menu visibility when checkbox is checked/unchecked
 checkbox.addEventListener('change', function() {
   if (this.checked) {
     menu.style.display = 'flex'; // enable flexbox
     document.getElementById('footer').style.display = 'none';
   } else {
-    menu.style.display = 'none'; // Hide
+    menu.style.display = 'none';
   }
 });
 
 // Close menu when clicking outside of it
 document.addEventListener('click', function(e) {
   if (!menu.contains(e.target) && !checkbox.contains(e.target)) {
-    menu.style.display = 'none'; // Close the menu if clicked outside
+    menu.style.display = 'none';
     document.getElementById('footer').style.display = 'block';
     checkbox.checked = false;
+  }
+  if (!downloadMenu.contains(e.target)) {
+    downloadMenu.style.display = 'none';
   }
 });
 
 // Logo Boolean
 document.querySelectorAll('input[name="displayLogo"]').forEach((radioButton) => {
   radioButton.addEventListener('change', () => {
-    if (radioButton.checked) {
-      const selectedOption = radioButton.id; // Get the selected radio button's ID
-      
-      if (uploadedFile) {
-        // Trigger canvas redraw
-        const aspectRatio = img.width / img.height;
-        let newWidth = img.width;
-        let newHeight = img.height;
+    const selectedOption = radioButton.id; // Get the selected radio button's ID
 
-        // Pass additional logic or options based on the selected radio button
-        if (selectedOption === 'option-1') {
-          console.log("Option 1 selected: Showing base image");
-          redraw(img, exifData, base_image, ctx, newWidth, newHeight);
-        } else if (selectedOption === 'option-2') {
-          console.log("Option 2 selected: Hiding base image");
-          redraw(img, exifData, null, ctx, newWidth, newHeight); // Example: No base image
-        }
+    if (uploadedFile) {
+      let newWidth = img.width;
+      let newHeight = img.height;
+
+      if (selectedOption === 'option-3') {
+        base_image.src = 'others/apple_logo.png';
+        base_image.onload = () => {
+          redraw(img, exifData, base_image, ctx, newWidth, newHeight); // Wait for base image to load
+        };
+      } else if (selectedOption === 'option-4') {
+        base_image.src = '';  // Set base image to an empty string to "hide" it
+        redraw(img, exifData, null, ctx, newWidth, newHeight);
       }
     }
   });
 });
 
-// Listen for changes on the radio buttons
-document.querySelectorAll('input[name="displayTime"]').forEach((radioButton) => {
-  radioButton.addEventListener('change', () => {
-    if (radioButton.checked) {
-      // Check which radio button is selected
-      if (radioButton.id === 'option-3') {
-        showTime = true;  // Show time
-        console.log("Time Displayed: ON");
-      } else {
-        showTime = false; // Hide time
-        console.log("Time Displayed: OFF");
-      }
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+  radio.addEventListener('change', event => {
+    const { name, value } = event.target;
 
-      // Redraw the canvas with the updated showTime flag
-      if (uploadedFile) {
-        const aspectRatio = img.width / img.height;
-        let newWidth = img.width;
-        let newHeight = img.height;
-
-        // Pass the showTime flag to redraw function
-        redraw(img, exifData, base_image, ctx, newWidth, newHeight);
-      }
+    // Update the state based on the button's name and value
+    if (buttonState[name]) {
+      buttonState[name].active = value === 'on';
+    }
+    if (base_image === null) {
+      redraw(img, exifData, null, ctx, img.width, img.height);
+    } else {
+      redraw(img, exifData, base_image, ctx, img.width, img.height);
     }
   });
 });
+
+const fullHeight = () => {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+};
+
+window.addEventListener('resize', fullHeight);
+fullHeight();
