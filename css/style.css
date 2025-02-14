@@ -183,13 +183,13 @@ input[type=text] {
   }
   @font-face {
     font-family: "sfpro";
-    src: url("fonts/sf-pro-text_regular.woff2");
+    src: url("../fonts/sf-pro-text_regular.woff2");
   }
   @font-face {
     font-family: "sfpromed";
-    src: url("fonts/SF-Pro-Display-Medium.otf");
+    src: url("../fonts/SF-Pro-Display-Medium.otf");
   }
   @font-face {
     font-family: "inter";
-    src: url("fonts/Inter_18pt-Light.ttf");
+    src: url("../fonts/Inter_18pt-Light.ttf");
   }
